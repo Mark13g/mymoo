@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0e0b1e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>MyMood — Daily Mood Tracker</title>
+<style>
+  :root{{
+    --bg:#0e0b1e; --bg2:#171230; --card:#1d1740; --card2:#251d52;
+    --gold:#f0c96a; --gold2:#ffe9b0; --lav:#a78bfa; --txt:#f3efff; --mut:#9a8fc4;
+    --good:#7ee0a3; --warn:#f0a06a; --bad:#f07a8a;
+  }}
+  *{{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}}
+  body{{font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    background:radial-gradient(1200px 800px at 80% -10%,#2b1f63 0%,var(--bg) 55%) fixed var(--bg);
+    color:var(--txt);min-height:100vh;padding-bottom:40px}}
+  .wrap{{max-width:520px;margin:0 auto;padding:0 18px}}
+  header{{padding:26px 0 6px;display:flex;align-items:center;justify-content:space-between}}
+  .logo{{font-size:26px;font-weight:800;letter-spacing:.5px}}
+  .logo span{{color:var(--gold)}}
+  .date{{color:var(--mut);font-size:13px;margin-top:2px}}
+  .card{{background:linear-gradient(160deg,var(--card),var(--card2));
+    border:1px solid rgba(167,139,250,.18);border-radius:20px;padding:20px;margin-top:18px;
+    box-shadow:0 8px 30px rgba(0,0,0,.35)}}
+  h2{{font-size:14px;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin-bottom:14px}}
+  .btn{{width:100%;background:linear-gradient(90deg,var(--gold),#e0a83e);color:#241a05;
+    font-weight:800;font-size:15px;border:none;border-radius:14px;padding:14px;cursor:pointer;letter-spacing:.5px}}
+  .btn:active{{transform:scale(.98)}}
+  .ghost{{background:none;border:1px solid var(--mut);color:var(--mut);border-radius:99px;
+    padding:6px 14px;font-size:12px;cursor:pointer}}
+  .ghost:hover{{color:var(--txt);border-color:var(--txt)}}
+  .done{{color:var(--good);text-align:center;font-size:13px;margin-top:10px;display:none}}
+  .lock-blur{{filter:blur(7px);pointer-events:none;user-select:none;min-height:80px}}
+  .lock-msg{{text-align:center;padding:10px 0 4px}}
+  .price-row{{display:flex;gap:12px;margin-top:14px}}
+  .price{{flex:1;background:var(--bg2);border:1px solid rgba(240,201,106,.25);border-radius:16px;
+    padding:16px 12px;text-align:center;cursor:pointer;transition:.15s}}
+  .price:hover{{border-color:var(--gold);transform:translateY(-2px)}}
+  .price b{{font-size:24px;color:var(--gold2);display:block}}
+  .price span{{font-size:12px;color:var(--mut);display:block;margin-top:4px}}
+  .save-tag{{background:var(--good);color:#0b2416;font-size:10px;font-weight:800;border-radius:99px;
+    padding:2px 8px;display:inline-block;margin-bottom:6px}}
+  .pro-badge{{background:linear-gradient(90deg,var(--gold),#e0a83e);color:#241a05;font-size:10px;
+    font-weight:800;border-radius:99px;padding:2px 9px;margin-left:8px;vertical-align:middle}}
+  .feats{{list-style:none;margin-top:14px}}
+  .feats li{{padding:6px 0;font-size:14px}}
+  .feats li::before{{content:"✓ ";color:var(--good);font-weight:800}}
+  footer{{text-align:center;color:#5e5487;font-size:11px;margin-top:30px}}
+  input[type=date]{{width:100%;margin-top:22px;background:var(--card);border:1px solid rgba(167,139,250,.3);
+    border-radius:14px;color:var(--txt);padding:14px;font-size:16px;text-align:center}}
+  #onboard{{position:fixed;inset:0;background:var(--bg);z-index:50;display:flex;
+    align-items:center;justify-content:center;padding:20px}}
+  .ob-inner{{max-width:420px;width:100%;text-align:center}}
+  .ob-logo{{font-size:56px}}
+  .ob-title{{font-size:30px;font-weight:800;margin-top:10px}}
+  .ob-title span{{color:var(--gold)}}
+  .ob-sub{{color:var(--mut);margin-top:8px;font-size:14px;line-height:1.5}}
+  .ob-btn{{width:100%;margin-top:14px;background:linear-gradient(90deg,var(--gold),#e0a83e);
+    color:#241a05;font-weight:800;font-size:16px;border:none;border-radius:14px;padding:15px;cursor:pointer}}
+    .moods{display:flex;justify-content:space-between;gap:8px;margin-top:6px}
+  .mood{flex:1;background:var(--bg2);border:2px solid transparent;border-radius:16px;
+    padding:14px 4px;text-align:center;cursor:pointer;transition:.15s}
+  .mood .e{font-size:30px;display:block}
+  .mood .l{font-size:11px;color:var(--mut);margin-top:6px;display:block}
+  .mood.sel{border-color:var(--gold);background:rgba(240,201,106,.12)}
+  .mood:hover{transform:translateY(-2px)}
+  .note{width:100%;margin-top:14px;background:var(--bg2);border:1px solid rgba(167,139,250,.2);
+    border-radius:12px;color:var(--txt);padding:12px;font-size:14px;font-family:inherit;resize:none}
+  .stats{display:flex;gap:10px;margin-top:16px}
+  .stat{flex:1;background:var(--bg2);border-radius:14px;padding:12px;text-align:center}
+  .stat b{font-size:22px;color:var(--gold2);display:block}
+  .stat span{font-size:11px;color:var(--mut)}
+  canvas{width:100%;height:150px;display:block;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div><div class="logo">My<span>Mood</span></div><div class="date" id="today"></div></div>
+    <div style="text-align:right"><div class="date" id="greet"></div></div>
+  </header>
+
+  <div class="card">
+    <h2>😊 How are you feeling?</h2>
+    <div class="moods" id="moods">
+      <div class="mood" data-v="1"><span class="e">😞</span><span class="l">Rough</span></div>
+      <div class="mood" data-v="2"><span class="e">😕</span><span class="l">Low</span></div>
+      <div class="mood" data-v="3"><span class="e">😐</span><span class="l">Okay</span></div>
+      <div class="mood" data-v="4"><span class="e">🙂</span><span class="l">Good</span></div>
+      <div class="mood" data-v="5"><span class="e">😄</span><span class="l">Great</span></div>
+    </div>
+    <textarea class="note" id="note" rows="2" placeholder="One line about today (optional)…"></textarea>
+    <button class="btn" onclick="saveMood()">Log today's mood</button>
+    <div class="done" id="doneMsg">✓ Logged. See you tomorrow.</div>
+    <div class="stats">
+      <div class="stat"><b id="stStreak">0</b><span>day streak</span></div>
+      <div class="stat"><b id="stAvg">–</b><span>30-day avg</span></div>
+      <div class="stat"><b id="stBest">–</b><span>best day</span></div>
+    </div>
+    <canvas id="chart" width="900" height="300"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>📓 Recent entries</h2>
+    <div id="entries"></div>
+  </div>
+
+  <div class="card">
+    <h2>🧠 Insights <span class="pro-badge">PRO</span></h2>
+    <div id="insBody"></div>
+  </div>
+
+    <div class="card" id="proCard">
+    <h2>⭐ MyMood Pro</h2>
+    <div id="proOwned" style="display:none;text-align:center;padding:14px 0">
+      <div style="font-size:40px">👑</div>
+      <div style="font-weight:700;margin-top:6px">You're a Pro member</div>
+      <div style="color:var(--mut);font-size:13px;margin-top:4px">Thank you for your support ✨</div>
+    </div>
+    <div id="proSell">
+      <ul class="feats"><li>Mood insights: best weekday, triggers, trends</li><li>Unlimited history + CSV export</li><li>Pattern alerts when mood dips</li></ul>
+      <div class="price-row">
+        <div class="price" onclick="buyPro('m')"><b>$2.99</b><span>per month</span><span>Monthly</span></div>
+        <div class="price" onclick="buyPro('y')"><span class="save-tag">SAVE 44%</span><b>$19.99</b><span>per year</span><span>Yearly</span></div>
+      </div>
+      <p style="color:var(--mut);font-size:11px;text-align:center;margin-top:12px">Secure checkout via Stripe · USD · cancel anytime</p>
+    </div>
+  </div>
+
+  <footer>MyMood · your data never leaves this device</footer>
+</div>
+
+<script>
+const EMO=['','😞','😕','😐','🙂','😄'];
+let selMood=0;
+function key(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function logs(){return JSON.parse(localStorage.getItem('mm_logs')||'{}')}
+
+document.querySelectorAll('.mood').forEach(el=>{el.addEventListener('click',()=>{
+  document.querySelectorAll('.mood').forEach(x=>x.classList.remove('sel'));
+  el.classList.add('sel');selMood=+el.dataset.v})});
+
+function saveMood(){
+  if(!selMood){const m=document.getElementById('doneMsg');m.textContent='Pick a mood first 🙂';m.style.color='var(--warn)';m.style.display='block';return}
+  const l=logs();const n=new Date();
+  l[key(n)]={v:selMood,n:document.getElementById('note').value.trim()};
+  localStorage.setItem('mm_logs',JSON.stringify(l));
+  const m=document.getElementById('doneMsg');m.textContent='✓ Logged. See you tomorrow.';m.style.color='var(--good)';m.style.display='block';
+  document.getElementById('note').value='';refresh();
+}
+
+function refresh(){
+  const l=logs();const n=new Date();
+  let streak=0;const d=new Date(n);
+  if(!l[key(d)])d.setDate(d.getDate()-1);
+  while(l[key(d)]){streak++;d.setDate(d.getDate()-1)}
+  document.getElementById('stStreak').textContent=streak;
+  let sum=0,cnt=0,best=0,bestDay='–';
+  for(let i=29;i>=0;i--){const dd=new Date(n);dd.setDate(dd.getDate()-i);
+    const e=l[key(dd)];if(e){sum+=e.v;cnt++;if(e.v>best){best=e.v;bestDay=dd.toLocaleDateString('en-US',{weekday:'short'})}}}
+  document.getElementById('stAvg').textContent=cnt?(sum/cnt).toFixed(1):'–';
+  document.getElementById('stBest').textContent=best?bestDay+' '+EMO[best]:'–';
+  if(l[key(n)]){const m=document.getElementById('doneMsg');m.textContent='✓ Today: '+EMO[l[key(n)].v]+' logged.';m.style.color='var(--good)';m.style.display='block';
+    document.querySelectorAll('.mood').forEach(x=>x.classList.toggle('sel',+x.dataset.v===l[key(n)].v))}
+  drawChart(l,n);renderEntries(l,n);renderInsights(l,n);
+}
+
+function drawChart(l,n){
+  const cv=document.getElementById('chart'),ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height,pad=30;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='rgba(167,139,250,.12)';
+  for(let g=1;g<=5;g++){const y=H-pad-(H-2*pad)*g/5;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(W-10,y);ctx.stroke()}
+  const bw=(W-pad-10)/30;
+  for(let i=29;i>=0;i--){
+    const dd=new Date(n);dd.setDate(dd.getDate()-i);
+    const e=l[key(dd)];const x=pad+(29-i)*bw+bw*0.2;
+    ctx.fillStyle='rgba(167,139,250,.15)';const full=H-2*pad;
+    rr(ctx,x,pad,bw*0.6,full,5);ctx.fill();
+    if(e){const h=full*e.v/5;
+      const grad=ctx.createLinearGradient(0,pad+full-h,0,pad+full);
+      grad.addColorStop(0,'#ffe9b0');grad.addColorStop(1,'#f0c96a');
+      ctx.fillStyle=grad;rr(ctx,x,pad+full-h,bw*0.6,h,5);ctx.fill();
+      ctx.font='22px serif';ctx.textAlign='center';ctx.fillText(EMO[e.v],x+bw*0.3,pad+full-h-6)}
+    if(i%5===0){ctx.fillStyle='#9a8fc4';ctx.font='16px sans-serif';ctx.textAlign='center';
+      ctx.fillText(dd.toLocaleDateString('en-US',{day:'numeric'}),x+bw*0.3,H-6)}
+  }
+}
+function rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+
+function renderEntries(l,n){
+  let html='';let shown=0;
+  for(let i=0;i<60&&shown<7;i++){
+    const dd=new Date(n);dd.setDate(dd.getDate()-i);
+    const e=l[key(dd)];if(!e)continue;shown++;
+    html+='<div style="display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(167,139,250,.12)">'+
+      '<span style="font-size:22px">'+EMO[e.v]+'</span>'+
+      '<div style="flex:1"><div style="font-size:13px;font-weight:700">'+dd.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+'</div>'+
+      (e.n?'<div style="font-size:13px;color:var(--mut)">'+esc(e.n)+'</div>':'')+'</div></div>'}
+  document.getElementById('entries').innerHTML=html||'<div style="color:var(--mut);font-size:13px;text-align:center;padding:10px">No entries yet — log your first mood above.</div>';
+}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+function renderInsights(l,n){
+  const owned=renderPro();
+  const body=document.getElementById('insBody');
+  const inner=buildInsights(l,n);
+  if(owned){body.innerHTML=inner}
+  else{body.innerHTML='<div class="lock-blur">'+inner+'</div><div class="lock-msg"><button class="btn" style="max-width:260px" onclick="document.getElementById(\'proCard\').scrollIntoView({behavior:\'smooth\'})">Unlock Insights ⭐</button></div>'}
+}
+function buildInsights(l,n){
+  const wd=[[],[],[],[],[],[],[]];
+  for(let i=0;i<60;i++){const dd=new Date(n);dd.setDate(dd.getDate()-i);const e=l[key(dd)];
+    if(e)wd[dd.getDay()].push(e.v)}
+  const names=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  let bestD='–',bestA=0,has=false;
+  wd.forEach((arr,i)=>{if(arr.length){has=true;const a=arr.reduce((x,y)=>x+y,0)/arr.length;if(a>bestA){bestA=a;bestD=names[i]}}});
+  const week=[];for(let i=0;i<7;i++){const dd=new Date(n);dd.setDate(dd.getDate()-i);const e=l[key(dd)];if(e)week.push(e.v)}
+  let trend='Not enough data yet — check in daily.';
+  if(week.length>=5){const half=Math.floor(week.length/2);
+    const a=week.slice(0,half).reduce((x,y)=>x+y,0)/half,b=week.slice(half).reduce((x,y)=>x+y,0)/(week.length-half);
+    trend=b>a+0.3?'📈 Trending up this week — nice momentum.':b<a-0.3?'📉 Trending down. Be gentle with yourself; sleep and sunlight help.':'➡️ Holding steady. Consistency counts.'}
+  const total=Object.keys(l).length;
+  return '<div style="font-size:14px;line-height:1.7">'+
+    '<div style="padding:6px 0">🗓️ <b style="color:var(--gold2)">'+(has?bestD+'</b> is your happiest weekday (avg '+bestA.toFixed(1)+'/5).':'Check in a few more days to see your best weekday.')+'</div>'+
+    '<div style="padding:6px 0">'+trend+'</div>'+
+    '<div style="padding:6px 0">📝 <b style="color:var(--gold2)">'+total+'</b> total check-ins logged.</div>'+
+    (owned?'<button class="ghost" style="margin-top:10px" onclick="exportCSV()">⬇ Export CSV</button>':'')+
+    '</div>';
+}
+function exportCSV(){
+  const l=logs();let csv='date,mood,note\n';
+  Object.keys(l).sort().forEach(k=>{csv+=k+','+l[k].v+',"'+String(l[k].n||'').replace(/"/g,'""')+'"\n'});
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='mymood-export.csv';a.click();
+}
+
+const n=new Date();
+document.getElementById('today').textContent=n.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+const h=n.getHours();
+document.getElementById('greet').textContent=h<12?'Good morning ☀️':h<18?'Good afternoon 🌤':'Good evening 🌙';
+window.addEventListener('load',refresh);
+/* ---------- Pro (USD via Stripe) ---------- */
+const STRIPE_LINKS={monthly:'',yearly:''};
+function isPro(){return localStorage.getItem('pro')==='1'||new URLSearchParams(location.search).get('pro')==='1'}
+function buyPro(plan){
+  const url=STRIPE_LINKS[plan==='m'?'monthly':'yearly'];
+  if(!url){alert('Checkout is being set up - please try again shortly.');return}
+  location.href=url;
+}
+function renderPro(){
+  const owned=isPro();
+  if(owned)localStorage.setItem('pro','1');
+  const o=document.getElementById('proOwned'),s=document.getElementById('proSell');
+  if(o)o.style.display=owned?'block':'none';
+  if(s)s.style.display=owned?'none':'block';
+  return owned;
+}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function seed(){const d=new Date();return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate()}
+function pick(r,arr){return arr[Math.floor(r()*arr.length)]}
+</script>
+</body>
+</html>
